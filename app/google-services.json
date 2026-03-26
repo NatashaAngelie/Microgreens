@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "50128344299",
+    "project_id": "microgreens-682b8",
+    "storage_bucket": "microgreens-682b8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50128344299:android:825ea4ea6787a0864e1aae",
+        "android_client_info": {
+          "package_name": "edu.uph.m23si1.microgreens"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGCK_X0PgNgQUpxJeQ07dl8KeJVxUf97g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
