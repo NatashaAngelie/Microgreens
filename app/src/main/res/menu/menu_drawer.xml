@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- SETTINGS -->
+    <item android:title="Settings">
+        <menu>
+
+            <item
+                android:id="@+id/menu_profile"
+                android:title="Profile"
+                android:icon="@android:drawable/ic_menu_myplaces"/>
+
+            <item
+                android:id="@+id/menu_plants"
+                android:title="My Plants"
+                android:icon="@android:drawable/ic_menu_agenda"/>
+
+        </menu>
+    </item>
+</menu>

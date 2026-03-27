@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         boolean remember = pref.getBoolean("remember", false);
 
         if (auth.getCurrentUser() != null && remember) {
-            startActivity(new Intent(this, DashboardActivity.class));
+            startActivity(new Intent(this, MainActivity.class));
             finish();
         }
 
@@ -106,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
                                 .putBoolean("remember", rememberMe.isChecked())
                                 .apply();
 
-                        startActivity(new Intent(this, DashboardActivity.class));
+                        startActivity(new Intent(this, MainActivity.class));
                         finish();
 
                     } else {
