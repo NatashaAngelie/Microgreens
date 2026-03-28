@@ -1,45 +1,42 @@
 package edu.uph.m23si1.microgreens.Model;
 
 public class HistoryModel {
+    public enum RowType { HEADER, EVENT }
 
-    String plantName;
-    String datePlanted;
-    String dateSprouted;
-    String dateHarvested;
+    private RowType type;
 
-    String lastWatered;
+    private String plantName;
+    private String lastActivityLabel;
+    private String lastActivityTime;
 
-    String lampStatus;
-    String lampChanged;
-
-    String fanStatus;
-    String fanChanged;
+    private String eventTitle;
+    private String eventTime;
 
     public HistoryModel() {}
 
-    public HistoryModel(String plantName, String datePlanted, String dateSprouted,
-                        String dateHarvested, String lastWatered,
-                        String lampStatus, String lampChanged,
-                        String fanStatus, String fanChanged) {
-
-        this.plantName = plantName;
-        this.datePlanted = datePlanted;
-        this.dateSprouted = dateSprouted;
-        this.dateHarvested = dateHarvested;
-        this.lastWatered = lastWatered;
-        this.lampStatus = lampStatus;
-        this.lampChanged = lampChanged;
-        this.fanStatus = fanStatus;
-        this.fanChanged = fanChanged;
+    public static HistoryModel header(String plantName, String lastActivityLabel, String lastActivityTime) {
+        HistoryModel row = new HistoryModel();
+        row.type = RowType.HEADER;
+        row.plantName = plantName;
+        row.lastActivityLabel = lastActivityLabel;
+        row.lastActivityTime = lastActivityTime;
+        return row;
     }
 
+    public static HistoryModel event(String eventTitle, String eventTime) {
+        HistoryModel row = new HistoryModel();
+        row.type = RowType.EVENT;
+        row.eventTitle = eventTitle;
+        row.eventTime = eventTime;
+        return row;
+    }
+
+    public RowType getType() { return type; }
+
     public String getPlantName() { return plantName; }
-    public String getDatePlanted() { return datePlanted; }
-    public String getDateSprouted() { return dateSprouted; }
-    public String getDateHarvested() { return dateHarvested; }
-    public String getLastWatered() { return lastWatered; }
-    public String getLampStatus() { return lampStatus; }
-    public String getLampChanged() { return lampChanged; }
-    public String getFanStatus() { return fanStatus; }
-    public String getFanChanged() { return fanChanged; }
+    public String getLastActivityLabel() { return lastActivityLabel; }
+    public String getLastActivityTime() { return lastActivityTime; }
+
+    public String getEventTitle() { return eventTitle; }
+    public String getEventTime() { return eventTime; }
 }

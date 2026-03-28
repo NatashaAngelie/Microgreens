@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/plantCardRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="14dp"
-    android:layout_marginBottom="14dp"
+    android:layout_marginBottom="12dp"
     android:background="@android:color/white">
 
     <ImageView
@@ -28,23 +29,23 @@
             android:layout_height="wrap_content"
             android:text="Radish"
             android:textSize="16sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/lastActivityLabel"
+            android:id="@+id/lastActivityDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Last Activity: Watered"
+            android:text="Last Activity: 11 September"
             android:textSize="13sp"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:id="@+id/lastActivityTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2025 11.03.05 WIB"
+            android:text="2025 11.03.05"
             android:textSize="12sp"
             android:textColor="#666666"
-            android:layout_marginTop="2dp"/>
+            android:layout_marginTop="2dp" />
     </LinearLayout>
 </LinearLayout>

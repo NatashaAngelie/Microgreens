@@ -23,7 +23,8 @@
                 android:src="@drawable/tanam"/>
 
             <TextView
-                android:text="Radish Microgreens"
+                android:id="@+id/tvCurrentPlantName"
+                android:text="@string/plant_name_placeholder"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginStart="10dp"
@@ -346,7 +347,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/tvPrevPlant"
-                    android:text="Radish Microgreens"
+                    android:text="@string/plant_name_placeholder"
                     android:textStyle="bold"
                     android:textSize="16sp"/>
 

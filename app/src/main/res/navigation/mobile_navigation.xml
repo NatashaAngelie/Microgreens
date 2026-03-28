@@ -21,5 +21,5 @@
         android:id="@+id/navigation_notifications"
         android:name="edu.uph.m23si1.microgreens.ui.history.HistoryFragment"
         android:label="@string/title_history"
-        tools:layout="@layout/fragment_history" />
+        tools:layout="@layout/fragment_history_list" />
 </navigation>

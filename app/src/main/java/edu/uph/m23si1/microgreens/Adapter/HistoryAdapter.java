@@ -3,6 +3,7 @@ package edu.uph.m23si1.microgreens.Adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,41 +14,49 @@ import java.util.List;
 import edu.uph.m23si1.microgreens.Model.HistoryModel;
 import edu.uph.m23si1.microgreens.R;
 
-public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
+public class HistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    List<HistoryModel> list;
+    private final List<HistoryModel> list;
 
-    public HistoryAdapter(List<HistoryModel> list){
+    public HistoryAdapter(List<HistoryModel> list) {
         this.list = list;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        HistoryModel model = list.get(position);
+        return model.getType() == HistoryModel.RowType.HEADER ? 0 : 1;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == 0) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_history, parent, false);
+            return new HeaderViewHolder(view);
+        }
 
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_history, parent, false);
-
-        return new ViewHolder(view);
+                .inflate(R.layout.item_history_event, parent, false);
+        return new EventViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         HistoryModel model = list.get(position);
 
-        holder.plantName.setText(model.getPlantName());
-        holder.datePlanted.setText(model.getDatePlanted());
-        holder.dateSprouted.setText(model.getDateSprouted());
-        holder.dateHarvested.setText(model.getDateHarvested());
+        if (holder instanceof HeaderViewHolder) {
+            HeaderViewHolder h = (HeaderViewHolder) holder;
+            h.plantName.setText(model.getPlantName() != null ? model.getPlantName() : "-");
+            h.lastActivityLabel.setText(model.getLastActivityLabel() != null ? model.getLastActivityLabel() : "Last Activity: -");
+            h.lastActivityTime.setText(model.getLastActivityTime() != null ? model.getLastActivityTime() : "-");
+            return;
+        }
 
-        holder.lastWatered.setText(model.getLastWatered());
-
-        holder.lampStatus.setText(model.getLampStatus());
-        holder.lampChanged.setText(model.getLampChanged());
-
-        holder.fanStatus.setText(model.getFanStatus());
-        holder.fanChanged.setText(model.getFanChanged());
+        EventViewHolder e = (EventViewHolder) holder;
+        e.eventTitle.setText(model.getEventTitle() != null ? model.getEventTitle() : "-");
+        e.eventTime.setText(model.getEventTime() != null ? model.getEventTime() : "-");
     }
 
     @Override
@@ -55,28 +64,29 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         return list.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class HeaderViewHolder extends RecyclerView.ViewHolder {
+        ImageView plantImage;
+        TextView plantName;
+        TextView lastActivityLabel;
+        TextView lastActivityTime;
 
-        TextView plantName,datePlanted,dateSprouted,dateHarvested;
-        TextView lastWatered;
-        TextView lampStatus,lampChanged;
-        TextView fanStatus,fanChanged;
-
-        public ViewHolder(@NonNull View itemView) {
+        public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
-
+            plantImage = itemView.findViewById(R.id.plantImage);
             plantName = itemView.findViewById(R.id.plantName);
-            datePlanted = itemView.findViewById(R.id.datePlanted);
-            dateSprouted = itemView.findViewById(R.id.dateSprouted);
-            dateHarvested = itemView.findViewById(R.id.dateHarvested);
+            lastActivityLabel = itemView.findViewById(R.id.lastActivityLabel);
+            lastActivityTime = itemView.findViewById(R.id.lastActivityTime);
+        }
+    }
 
-            lastWatered = itemView.findViewById(R.id.lastWatered);
+    public static class EventViewHolder extends RecyclerView.ViewHolder {
+        TextView eventTitle;
+        TextView eventTime;
 
-            lampStatus = itemView.findViewById(R.id.lampStatus);
-            lampChanged = itemView.findViewById(R.id.lampChanged);
-
-            fanStatus = itemView.findViewById(R.id.fanStatus);
-            fanChanged = itemView.findViewById(R.id.fanChanged);
+        public EventViewHolder(@NonNull View itemView) {
+            super(itemView);
+            eventTitle = itemView.findViewById(R.id.eventTitle);
+            eventTime = itemView.findViewById(R.id.eventTime);
         }
     }
 }

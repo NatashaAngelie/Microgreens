@@ -5,91 +5,99 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.uph.m23si1.microgreens.Adapter.HistoryAdapter;
-import edu.uph.m23si1.microgreens.Model.HistoryModel;
+import edu.uph.m23si1.microgreens.Adapter.PlantCardAdapter;
+import edu.uph.m23si1.microgreens.Model.PlantCardModel;
 import edu.uph.m23si1.microgreens.R;
+import edu.uph.m23si1.microgreens.data.MicrogreensSnapshot;
 
 public class HistoryFragment extends Fragment {
 
-    RecyclerView recyclerView;
-    HistoryAdapter adapter;
-    List<HistoryModel> list;
+    RecyclerView currentRecycler;
+    RecyclerView previousRecycler;
+    PlantCardAdapter currentAdapter;
+    PlantCardAdapter previousAdapter;
+    List<PlantCardModel> currentList;
+    List<PlantCardModel> previousList;
 
     DatabaseReference db;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_history, container, false);
+        View view = inflater.inflate(R.layout.fragment_history_list, container, false);
 
-        recyclerView = view.findViewById(R.id.historyRecycler);
+        currentRecycler = view.findViewById(R.id.currentPlantRecycler);
+        previousRecycler = view.findViewById(R.id.previousPlantRecycler);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        currentRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        previousRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        list = new ArrayList<>();
-        adapter = new HistoryAdapter(list);
+        currentList = new ArrayList<>();
+        previousList = new ArrayList<>();
 
-        recyclerView.setAdapter(adapter);
+        PlantCardAdapter.OnPlantClickListener click = plant -> {
+            if (plant == null) return;
+            HistoryLogFragment logFragment = HistoryLogFragment.newInstance(
+                    plant.getName(),
+                    plant.getLastActivityDateLabel(),
+                    plant.getLastActivityTime()
+            );
+            requireActivity()
+                    .getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, logFragment)
+                    .addToBackStack(null)
+                    .commit();
+        };
 
-        db = FirebaseDatabase.getInstance().getReference("microgreens");
+        currentAdapter = new PlantCardAdapter(currentList, click);
+        previousAdapter = new PlantCardAdapter(previousList, click);
+        currentRecycler.setAdapter(currentAdapter);
+        previousRecycler.setAdapter(previousAdapter);
 
+        db = FirebaseDatabase.getInstance().getReference(MicrogreensSnapshot.REF_MICROGREENS);
         loadData();
 
         return view;
     }
 
-    private void loadData(){
-
+    private void loadData() {
         db.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                currentList.clear();
 
-                list.clear();
+                PlantCardModel current = MicrogreensSnapshot.buildCurrentPlantCard(snapshot);
+                if (current != null) {
+                    currentList.add(current);
+                }
 
-                String plantName = snapshot.child("plant").child("name").getValue(String.class);
-                String planted = snapshot.child("plant").child("datePlanted").getValue(String.class);
-                String sprouted = snapshot.child("plant").child("dateSprouted").getValue(String.class);
-                String harvested = snapshot.child("plant").child("dateHarvested").getValue(String.class);
+                if (previousList.isEmpty()) {
+                    previousList.add(new PlantCardModel("Bean Sprouts", "Last Activity: 11 September", "2025 11.03.05"));
+                    previousList.add(new PlantCardModel("Spinach", "Last Activity: 11 September", "2025 11.03.05"));
+                    previousList.add(new PlantCardModel("Carrot", "Last Activity: 11 September", "2025 11.03.05"));
+                }
 
-                String lastWatered = snapshot.child("history").child("lastWatered").getValue(String.class);
-
-                Boolean lamp = snapshot.child("control").child("lamp").getValue(Boolean.class);
-                String lampStatus = lamp != null && lamp ? "ON" : "OFF";
-
-                String lampChanged = snapshot.child("history").child("lastLampChange").getValue(String.class);
-
-                Boolean fan = snapshot.child("control").child("fan").getValue(Boolean.class);
-                String fanStatus = fan != null && fan ? "ON" : "OFF";
-
-                String fanChanged = snapshot.child("history").child("lastFanChange").getValue(String.class);
-
-                list.add(new HistoryModel(
-                        plantName,
-                        planted,
-                        sprouted,
-                        harvested,
-                        lastWatered,
-                        lampStatus,
-                        lampChanged,
-                        fanStatus,
-                        fanChanged
-                ));
-
-                adapter.notifyDataSetChanged();
+                currentAdapter.notifyDataSetChanged();
+                previousAdapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
-
+            public void onCancelled(@NonNull DatabaseError error) {
             }
         });
     }
