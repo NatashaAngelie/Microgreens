@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Microgreens</string>
+    <string name="title_activity_dashboard">DashboardActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_control">Control</string>
+    <string name="title_history">History</string>
+    <string name="open">Buka Menu</string>
+    <string name="close">Tutup Menu</string>
+</resources>
