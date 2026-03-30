@@ -9,4 +9,36 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="plant_name_placeholder">—</string>
+
+    <string name="add_new_plant">+ Add new plant</string>
+    <string name="add_plant_title">Add Plant</string>
+    <string name="add_plants_screen_title">Add Plants</string>
+    <string name="edit_plant_title">Edit Plant</string>
+    <string name="edit_plants_screen_title">Edit Plants</string>
+    <string name="save_plant">Save plant</string>
+    <string name="btn_add_plant">Add Plant</string>
+    <string name="btn_save_edit">Save Edit</string>
+    <string name="label_plant_name">Plant name</string>
+    <string name="label_date_planted">Date planted</string>
+    <string name="label_date_sprouted_optional">Date sprouted (optional)</string>
+    <string name="label_harvest_optional">Harvest date (optional)</string>
+    <string name="label_date_harvest">Date harvest</string>
+    <string name="label_plant_photo">Plant photo</string>
+    <string name="photo_upload_hint">Photo from gallery — coming soon</string>
+    <string name="hint_select_plant">Select a plant</string>
+    <string name="hint_date_yyyy_mm_dd">YYYY-MM-DD</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="delete_plant_title">Delete plant</string>
+    <string name="delete_plant_message">Remove \"%1$s\" from your list? This cannot be undone.</string>
+    <string name="fill_required_fields">Enter plant name and date planted.</string>
+    <string name="save_plant_failed">Could not save to Firebase. Check internet and database rules.</string>
+    <string name="plant_not_found">Plant not found.</string>
+    <string name="planted_prefix">Planted:</string>
+    <string name="sprouted_prefix">Sprouted:</string>
+    <string name="harvest_prefix">Harvest:</string>
+    <string name="harvested_label">Harvested:</string>
+    <string name="toolbar_home">Smart Microgreens</string>
+    <string name="toolbar_manage_plants">Manage Plants</string>
+    <string name="toolbar_history">History</string>
 </resources>

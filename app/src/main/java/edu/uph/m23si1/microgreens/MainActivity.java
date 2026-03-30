@@ -23,8 +23,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import edu.uph.m23si1.microgreens.ui.control.ControlFragment;
 import edu.uph.m23si1.microgreens.ui.history.HistoryFragment;
 import edu.uph.m23si1.microgreens.ui.home.HomeFragment;
+import edu.uph.m23si1.microgreens.ui.plants.ManagePlantsFragment;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String EXTRA_OPEN_MANAGE_PLANTS = "open_manage_plants";
 
     DrawerLayout drawerLayout;
     BottomNavigationView bottomNav;
@@ -56,19 +59,19 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // ===== DEFAULT FRAGMENT =====
-        loadFragment(new HomeFragment());
-
         // ===== BOTTOM NAVIGATION =====
         bottomNav.setOnItemSelectedListener(item -> {
 
             if (item.getItemId() == R.id.navigation_home) {
+                setToolbarTitle(getString(R.string.toolbar_home));
                 loadFragment(new HomeFragment());
             }
             else if (item.getItemId() == R.id.navigation_control) {
+                setToolbarTitle(getString(R.string.title_control));
                 loadFragment(new ControlFragment());
             }
             else if (item.getItemId() == R.id.navigation_history) {
+                setToolbarTitle(getString(R.string.toolbar_history));
                 loadFragment(new HistoryFragment());
             }
 
@@ -78,12 +81,10 @@ public class MainActivity extends AppCompatActivity {
         // ===== DRAWER MENU (PROFILE & PLANTS) =====
         navDrawer.setNavigationItemSelectedListener(item -> {
 
-//            if (item.getItemId() == R.id.menu_profile) {
-//                loadFragment(new ProfileFragment());
-//            }
-//            else if (item.getItemId() == R.id.menu_plants) {
-//                loadFragment(new PlantsFragment());
-//            }
+            if (item.getItemId() == R.id.menu_plants) {
+                setToolbarTitle(getString(R.string.toolbar_manage_plants));
+                loadFragment(new ManagePlantsFragment());
+            }
 
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
@@ -108,13 +109,62 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
         });
+
+        if (consumeOpenManagePlantsFromIntent(getIntent())) {
+            // Sudah buka Manage Plants dari intent (mis. balik dari PlantFormActivity)
+        } else if (savedInstanceState == null) {
+            setToolbarTitle(getString(R.string.toolbar_home));
+            loadFragment(new HomeFragment());
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        consumeOpenManagePlantsFromIntent(intent);
+    }
+
+    /** @return true jika layar Manage Plants sudah dimuat dari intent */
+    private boolean consumeOpenManagePlantsFromIntent(Intent intent) {
+        if (intent == null) {
+            return false;
+        }
+        if (!intent.getBooleanExtra(EXTRA_OPEN_MANAGE_PLANTS, false)) {
+            return false;
+        }
+        intent.removeExtra(EXTRA_OPEN_MANAGE_PLANTS);
+        setToolbarTitle(getString(R.string.toolbar_manage_plants));
+        loadFragment(new ManagePlantsFragment());
+        return true;
     }
 
     // ===== FUNCTION PINDAH FRAGMENT =====
-    void loadFragment(Fragment fragment){
+    void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .commit();
+    }
+
+    public void setToolbarTitle(CharSequence title) {
+        if (toolbar != null) {
+            toolbar.setTitle(title);
+        }
+    }
+
+    /** Sembunyikan toolbar utama (mis. saat Manage Plants punya toolbar sendiri). */
+    public void setMainToolbarVisible(boolean visible) {
+        if (toolbar != null) {
+            toolbar.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    /** Tombol back dari layar Manage Plants → Home. */
+    public void navigateToHomeFromManagePlants() {
+        setMainToolbarVisible(true);
+        setToolbarTitle(getString(R.string.toolbar_home));
+        loadFragment(new HomeFragment());
+        bottomNav.setSelectedItemId(R.id.navigation_home);
     }
 }

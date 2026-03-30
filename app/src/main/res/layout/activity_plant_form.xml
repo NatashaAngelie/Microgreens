@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootPlantForm"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#E8E8E8">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarPlantForm"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#F5F5F5"
+        app:navigationIcon="@drawable/ic_back_24"
+        app:titleTextColor="#2C2C2C" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="vertical">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            app:cardBackgroundColor="#D0D0D0"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Lingkaran foto -->
+                <FrameLayout
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/bg_circle_white">
+
+                    <ImageView
+                        android:id="@+id/ivPlantPhoto"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/label_plant_photo"
+                        android:padding="28dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_camera_24" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_plant_name"
+                    android:textColor="#424242"
+                    android:textSize="13sp" />
+
+                <AutoCompleteTextView
+                    android:id="@+id/inputPlantName"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="14dp"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/hint_select_plant"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapWords"
+                    android:paddingHorizontal="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_date_planted"
+                    android:textColor="#424242"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/inputDatePlanted"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="14dp"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/hint_date_yyyy_mm_dd"
+                    android:imeOptions="actionNext"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingHorizontal="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_date_sprouted_optional"
+                    android:textColor="#424242"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/inputDateSprouted"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="14dp"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/hint_date_yyyy_mm_dd"
+                    android:imeOptions="actionNext"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingHorizontal="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_date_harvest"
+                    android:textColor="#424242"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/inputHarvestDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/hint_date_yyyy_mm_dd"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingHorizontal="12dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/plantFormButtonBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#E8E8E8"
+        android:elevation="6dp"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSavePlant"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="52dp"
+            android:text="@string/btn_add_plant"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#9E9E9E"
+            app:cornerRadius="12dp" />
+    </LinearLayout>
+</LinearLayout>

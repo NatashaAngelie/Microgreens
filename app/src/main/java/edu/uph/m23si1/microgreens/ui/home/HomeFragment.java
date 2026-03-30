@@ -12,10 +12,10 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import edu.uph.m23si1.microgreens.R;
+import edu.uph.m23si1.microgreens.data.AppFirebaseDatabase;
 import edu.uph.m23si1.microgreens.data.MicrogreensSnapshot;
 
 public class HomeFragment extends Fragment {
@@ -60,7 +60,7 @@ public class HomeFragment extends Fragment {
         tvSprout.setText("Sprouted: -");
         tvHarvest.setText("Harvested: -");
 
-        microgreensRef = FirebaseDatabase.getInstance().getReference(MicrogreensSnapshot.REF_MICROGREENS);
+        microgreensRef = AppFirebaseDatabase.get().getReference(MicrogreensSnapshot.REF_MICROGREENS);
         microgreensRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

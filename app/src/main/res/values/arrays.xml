@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="plant_name_suggestions">
+        <item>Sunflower microgreens</item>
+        <item>Pea shoots</item>
+        <item>Radish microgreens</item>
+        <item>Broccoli microgreens</item>
+        <item>Mustard microgreens</item>
+        <item>Arugula microgreens</item>
+        <item>Basil microgreens</item>
+        <item>Beet microgreens</item>
+        <item>Amaranth microgreens</item>
+    </string-array>
+</resources>

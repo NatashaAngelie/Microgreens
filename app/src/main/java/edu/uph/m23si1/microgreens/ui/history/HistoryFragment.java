@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import java.util.List;
 import edu.uph.m23si1.microgreens.Adapter.PlantCardAdapter;
 import edu.uph.m23si1.microgreens.Model.PlantCardModel;
 import edu.uph.m23si1.microgreens.R;
+import edu.uph.m23si1.microgreens.data.AppFirebaseDatabase;
 import edu.uph.m23si1.microgreens.data.MicrogreensSnapshot;
 
 public class HistoryFragment extends Fragment {
@@ -69,7 +69,7 @@ public class HistoryFragment extends Fragment {
         currentRecycler.setAdapter(currentAdapter);
         previousRecycler.setAdapter(previousAdapter);
 
-        db = FirebaseDatabase.getInstance().getReference(MicrogreensSnapshot.REF_MICROGREENS);
+        db = AppFirebaseDatabase.get().getReference(MicrogreensSnapshot.REF_MICROGREENS);
         loadData();
 
         return view;

@@ -11,10 +11,10 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import edu.uph.m23si1.microgreens.R;
+import edu.uph.m23si1.microgreens.data.AppFirebaseDatabase;
 
 public class ControlFragment extends Fragment {
 
@@ -39,7 +39,7 @@ public class ControlFragment extends Fragment {
         fanOn = view.findViewById(R.id.fanOn);
         fanOff = view.findViewById(R.id.fanOff);
 
-        controlRef = FirebaseDatabase.getInstance().getReference("microgreens/control");
+        controlRef = AppFirebaseDatabase.get().getReference("microgreens/control");
 
         setupButtons();
         readFirebase();

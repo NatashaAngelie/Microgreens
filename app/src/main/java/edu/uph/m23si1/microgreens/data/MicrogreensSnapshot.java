@@ -15,6 +15,12 @@ public final class MicrogreensSnapshot {
 
     public static final String REF_MICROGREENS = "microgreens";
 
+    /**
+     * Daftar tanaman (CRUD Manage Plants) — path di root DB, sama seperti node {@code plants}
+     * di Firebase Console. Bukan di bawah {@code microgreens/plants}.
+     */
+    public static final String REF_ROOT_PLANTS = "plants";
+
     private MicrogreensSnapshot() {}
 
     @Nullable
