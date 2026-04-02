@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.menu_profile) {
-                // buka profile (kalau ada)
+                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
             }
             else if (id == R.id.menu_plants) {
                 setToolbarTitle(getString(R.string.toolbar_manage_plants));

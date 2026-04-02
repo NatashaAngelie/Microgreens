@@ -21,6 +21,11 @@ public final class MicrogreensSnapshot {
      */
     public static final String REF_ROOT_PLANTS = "plants";
 
+    /**
+     * Profil pengguna per UID: {@code users/{uid}} berisi displayName, email, photoUrl.
+     */
+    public static final String REF_USERS = "users";
+
     private MicrogreensSnapshot() {}
 
     @Nullable

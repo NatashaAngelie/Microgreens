@@ -41,4 +41,19 @@
     <string name="toolbar_home">Smart Microgreens</string>
     <string name="toolbar_manage_plants">Manage Plants</string>
     <string name="toolbar_history">History</string>
+
+    <string name="profile_title">Profile</string>
+    <string name="profile_label_name">Name</string>
+    <string name="profile_label_email">Email</string>
+    <string name="profile_hint_name">Your name</string>
+    <string name="profile_hint_email">you@example.com</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_saved">Profile saved</string>
+    <string name="profile_photo_content_description">Profile photo</string>
+    <string name="profile_photo_updated">Photo updated</string>
+    <string name="profile_photo_save_failed">Could not save photo</string>
+    <string name="profile_not_signed_in">Sign in required to edit profile.</string>
+    <string name="profile_auth_update_failed">Could not update profile in Firebase Auth.</string>
+    <string name="profile_email_update_failed">Email could not be updated. You may need to sign in again.</string>
+    <string name="profile_database_save_failed">Could not save profile to the database. Check your connection and rules.</string>
 </resources>
