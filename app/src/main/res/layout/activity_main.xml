@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- TOOLBAR -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -20,14 +19,12 @@
             android:background="@android:color/white"
             app:titleTextColor="@android:color/black"/>
 
-        <!-- FRAGMENT -->
         <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"/>
 
-        <!-- BOTTOM NAV -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNav"
             android:layout_width="match_parent"
@@ -36,13 +33,39 @@
 
     </LinearLayout>
 
-    <!-- DRAWER -->
+    <!-- DRAWER CUSTOM -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navDrawer"
         android:layout_width="280dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:headerLayout="@layout/drawer_header"
-        app:menu="@menu/menu_drawer"/>
+        android:layout_gravity="start">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- MENU -->
+            <com.google.android.material.navigation.NavigationView
+                android:id="@+id/navMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:menu="@menu/menu_drawer"/>
+
+            <!-- DORONG KE BAWAH -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <!-- LOGOUT BUTTON -->
+            <include
+                layout="@layout/drawer_footer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>

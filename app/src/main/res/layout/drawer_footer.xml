@@ -1,0 +1,16 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- LOGOUT BUTTON -->
+        <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="LOG OUT"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#E53935"/>
+    </LinearLayout>

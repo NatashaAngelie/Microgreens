@@ -79,9 +79,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // ===== DRAWER MENU (PROFILE & PLANTS) =====
-        navDrawer.setNavigationItemSelectedListener(item -> {
+        // ===== DRAWER MENU =====
+        NavigationView navMenu = findViewById(R.id.navMenu);
 
-            if (item.getItemId() == R.id.menu_plants) {
+        navMenu.setNavigationItemSelectedListener(item -> {
+
+            int id = item.getItemId();
+
+            if (id == R.id.menu_profile) {
+                // buka profile (kalau ada)
+            }
+            else if (id == R.id.menu_plants) {
                 setToolbarTitle(getString(R.string.toolbar_manage_plants));
                 loadFragment(new ManagePlantsFragment());
             }
@@ -90,22 +98,19 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // ===== LOGOUT BUTTON (DARI HEADER) =====
-        View headerView = navDrawer.getHeaderView(0);
-        Button btnLogout = headerView.findViewById(R.id.btnLogout);
+
+        // ===== LOGOUT BUTTON =====
+        Button btnLogout = findViewById(R.id.btnLogout);
 
         btnLogout.setOnClickListener(v -> {
 
-            // Logout Firebase
             FirebaseAuth.getInstance().signOut();
 
-            // Hapus session (remember me)
             getSharedPreferences("user_pref", MODE_PRIVATE)
                     .edit()
                     .clear()
                     .apply();
 
-            // Pindah ke login
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
         });
