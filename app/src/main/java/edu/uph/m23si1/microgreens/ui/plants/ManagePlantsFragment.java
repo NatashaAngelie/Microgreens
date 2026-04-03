@@ -13,29 +13,30 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import edu.uph.m23si1.microgreens.Adapter.ManagePlantAdapter;
+import edu.uph.m23si1.microgreens.MainActivity;
 import edu.uph.m23si1.microgreens.Model.Plant;
 import edu.uph.m23si1.microgreens.Model.PlantListItem;
-import edu.uph.m23si1.microgreens.MainActivity;
 import edu.uph.m23si1.microgreens.PlantFormActivity;
 import edu.uph.m23si1.microgreens.R;
 import edu.uph.m23si1.microgreens.data.AppFirebaseDatabase;
-import edu.uph.m23si1.microgreens.data.MicrogreensSnapshot;
+import edu.uph.m23si1.microgreens.data.PlantFirebasePaths;
+import edu.uph.m23si1.microgreens.data.PlantsQuery;
 
 public class ManagePlantsFragment extends Fragment {
 
-    private DatabaseReference plantsRef;
+    private DatabaseReference databaseRootRef;
     private final List<PlantListItem> plantRows = new ArrayList<>();
     private ManagePlantAdapter adapter;
     private ValueEventListener plantsListener;
@@ -45,8 +46,7 @@ public class ManagePlantsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_manage_plants, container, false);
 
-        plantsRef = AppFirebaseDatabase.get()
-                .getReference(MicrogreensSnapshot.REF_ROOT_PLANTS);
+        databaseRootRef = AppFirebaseDatabase.get().getReference();
 
         MaterialToolbar tb = view.findViewById(R.id.toolbarManagePlants);
         tb.setNavigationOnClickListener(v -> {
@@ -66,6 +66,7 @@ public class ManagePlantsFragment extends Fragment {
             public void onEdit(@NonNull PlantListItem item) {
                 Intent i = new Intent(requireContext(), PlantFormActivity.class);
                 i.putExtra(PlantFormActivity.EXTRA_PLANT_ID, item.getId());
+                i.putExtra(PlantFormActivity.EXTRA_PLANT_PARENT_PATH, item.getParentPath());
                 startActivity(i);
             }
 
@@ -78,7 +79,7 @@ public class ManagePlantsFragment extends Fragment {
                         .setMessage(getString(R.string.delete_plant_message, label))
                         .setNegativeButton(android.R.string.cancel, null)
                         .setPositiveButton(R.string.delete, (d, w) ->
-                                plantsRef.child(item.getId()).removeValue())
+                                PlantFirebasePaths.plantRecord(item).removeValue())
                         .show();
             }
         });
@@ -111,12 +112,7 @@ public class ManagePlantsFragment extends Fragment {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     plantRows.clear();
-                    for (DataSnapshot child : snapshot.getChildren()) {
-                        Plant p = child.getValue(Plant.class);
-                        if (p != null) {
-                            plantRows.add(new PlantListItem(child.getKey(), p));
-                        }
-                    }
+                    plantRows.addAll(PlantsQuery.fromDatabaseRoot(snapshot));
                     Collections.sort(plantRows, (a, b) -> {
                         String da = a.getPlant().getDatePlanted();
                         String db = b.getPlant().getDatePlanted();
@@ -135,14 +131,14 @@ public class ManagePlantsFragment extends Fragment {
                 }
             };
         }
-        plantsRef.addValueEventListener(plantsListener);
+        databaseRootRef.addValueEventListener(plantsListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         if (plantsListener != null) {
-            plantsRef.removeEventListener(plantsListener);
+            databaseRootRef.removeEventListener(plantsListener);
         }
     }
 }

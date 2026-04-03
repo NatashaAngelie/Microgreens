@@ -40,7 +40,10 @@ public class PlantCardAdapter extends RecyclerView.Adapter<PlantCardAdapter.View
         PlantCardModel model = list.get(position);
         holder.plantName.setText(model.getName());
         holder.lastActivityDate.setText(model.getLastActivityDateLabel());
-        holder.lastActivityTime.setText(model.getLastActivityTime());
+        String time = model.getLastActivityTime();
+        holder.lastActivityTime.setText(time);
+        holder.lastActivityTime.setVisibility(
+                time != null && !time.trim().isEmpty() ? View.VISIBLE : View.GONE);
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onClick(model);

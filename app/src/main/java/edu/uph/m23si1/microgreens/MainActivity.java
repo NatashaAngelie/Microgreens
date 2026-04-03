@@ -14,6 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -22,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import edu.uph.m23si1.microgreens.ui.control.ControlFragment;
 import edu.uph.m23si1.microgreens.ui.history.HistoryFragment;
+import edu.uph.m23si1.microgreens.ui.history.HistoryLogFragment;
 import edu.uph.m23si1.microgreens.ui.home.HomeFragment;
 import edu.uph.m23si1.microgreens.ui.plants.ManagePlantsFragment;
 
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     BottomNavigationView bottomNav;
     NavigationView navDrawer;
     MaterialToolbar toolbar;
+    private ActionBarDrawerToggle drawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +52,26 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // ===== DRAWER TOGGLE (HAMBURGER ICON) =====
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        drawerToggle = new ActionBarDrawerToggle(
                 this,
                 drawerLayout,
                 toolbar,
                 R.string.open,
                 R.string.close
         );
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+
+        toolbar.setNavigationOnClickListener(v -> {
+            FragmentManager fm = getSupportFragmentManager();
+            if (fm.getBackStackEntryCount() > 0) {
+                fm.popBackStack();
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
+        getSupportFragmentManager().addOnBackStackChangedListener(this::updateToolbarForTopFragment);
 
         // ===== BOTTOM NAVIGATION =====
         bottomNav.setOnItemSelectedListener(item -> {
@@ -121,6 +135,38 @@ public class MainActivity extends AppCompatActivity {
             setToolbarTitle(getString(R.string.toolbar_home));
             loadFragment(new HomeFragment());
         }
+        updateToolbarForTopFragment();
+    }
+
+    private void updateToolbarForTopFragment() {
+        if (toolbar == null || drawerToggle == null) {
+            return;
+        }
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+        if (f instanceof HistoryLogFragment) {
+            drawerToggle.setDrawerIndicatorEnabled(false);
+            toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
+            setToolbarTitle(getString(R.string.history_log_title));
+        } else if (f instanceof ManagePlantsFragment) {
+            drawerToggle.setDrawerIndicatorEnabled(true);
+            drawerToggle.syncState();
+            setToolbarTitle(getString(R.string.toolbar_manage_plants));
+        } else {
+            drawerToggle.setDrawerIndicatorEnabled(true);
+            drawerToggle.syncState();
+            applyToolbarTitleForSelectedNav();
+        }
+    }
+
+    private void applyToolbarTitleForSelectedNav() {
+        int id = bottomNav.getSelectedItemId();
+        if (id == R.id.navigation_home) {
+            setToolbarTitle(getString(R.string.toolbar_home));
+        } else if (id == R.id.navigation_control) {
+            setToolbarTitle(getString(R.string.title_control));
+        } else if (id == R.id.navigation_history) {
+            setToolbarTitle(getString(R.string.toolbar_history));
+        }
     }
 
     @Override
@@ -146,10 +192,12 @@ public class MainActivity extends AppCompatActivity {
 
     // ===== FUNCTION PINDAH FRAGMENT =====
     void loadFragment(Fragment fragment) {
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .commit();
+        updateToolbarForTopFragment();
     }
 
     public void setToolbarTitle(CharSequence title) {

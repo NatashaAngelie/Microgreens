@@ -15,6 +15,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import edu.uph.m23si1.microgreens.R;
 import edu.uph.m23si1.microgreens.data.AppFirebaseDatabase;
+import edu.uph.m23si1.microgreens.data.MicrogreensHistoryWriter;
 
 public class ControlFragment extends Fragment {
 
@@ -49,14 +50,32 @@ public class ControlFragment extends Fragment {
 
     private void setupButtons() {
 
-        ledOn.setOnClickListener(v -> controlRef.child("led").setValue(true));
-        ledOff.setOnClickListener(v -> controlRef.child("led").setValue(false));
+        ledOn.setOnClickListener(v -> controlRef.child("led").setValue(true)
+                .addOnCompleteListener(t -> {
+                    if (t.isSuccessful()) MicrogreensHistoryWriter.logLedForActivePlant(true);
+                }));
+        ledOff.setOnClickListener(v -> controlRef.child("led").setValue(false)
+                .addOnCompleteListener(t -> {
+                    if (t.isSuccessful()) MicrogreensHistoryWriter.logLedForActivePlant(false);
+                }));
 
-        pumpOn.setOnClickListener(v -> controlRef.child("pump").setValue(true));
-        pumpOff.setOnClickListener(v -> controlRef.child("pump").setValue(false));
+        pumpOn.setOnClickListener(v -> controlRef.child("pump").setValue(true)
+                .addOnCompleteListener(t -> {
+                    if (t.isSuccessful()) MicrogreensHistoryWriter.logPumpForActivePlant(true);
+                }));
+        pumpOff.setOnClickListener(v -> controlRef.child("pump").setValue(false)
+                .addOnCompleteListener(t -> {
+                    if (t.isSuccessful()) MicrogreensHistoryWriter.logPumpForActivePlant(false);
+                }));
 
-        fanOn.setOnClickListener(v -> controlRef.child("fan").setValue(true));
-        fanOff.setOnClickListener(v -> controlRef.child("fan").setValue(false));
+        fanOn.setOnClickListener(v -> controlRef.child("fan").setValue(true)
+                .addOnCompleteListener(t -> {
+                    if (t.isSuccessful()) MicrogreensHistoryWriter.logFanForActivePlant(true);
+                }));
+        fanOff.setOnClickListener(v -> controlRef.child("fan").setValue(false)
+                .addOnCompleteListener(t -> {
+                    if (t.isSuccessful()) MicrogreensHistoryWriter.logFanForActivePlant(false);
+                }));
     }
 
     private void readFirebase() {

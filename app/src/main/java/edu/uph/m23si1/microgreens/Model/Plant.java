@@ -12,6 +12,10 @@ public class Plant {
     private String dateSprouted;
     private String harvestDate;
 
+    /** Ringkasan log terakhir (diisi {@link edu.uph.m23si1.microgreens.data.MicrogreensHistoryWriter}). */
+    private Long lastHistoryAt;
+    private String lastHistoryMessage;
+
     public Plant() {}
 
     public Plant(
@@ -56,5 +60,23 @@ public class Plant {
 
     public void setHarvestDate(String harvestDate) {
         this.harvestDate = harvestDate;
+    }
+
+    @Nullable
+    public Long getLastHistoryAt() {
+        return lastHistoryAt;
+    }
+
+    public void setLastHistoryAt(@Nullable Long lastHistoryAt) {
+        this.lastHistoryAt = lastHistoryAt;
+    }
+
+    @Nullable
+    public String getLastHistoryMessage() {
+        return lastHistoryMessage;
+    }
+
+    public void setLastHistoryMessage(@Nullable String lastHistoryMessage) {
+        this.lastHistoryMessage = lastHistoryMessage;
     }
 }

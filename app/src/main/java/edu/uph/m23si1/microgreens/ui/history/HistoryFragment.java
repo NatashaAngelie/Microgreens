@@ -20,9 +20,10 @@ import java.util.List;
 
 import edu.uph.m23si1.microgreens.Adapter.PlantCardAdapter;
 import edu.uph.m23si1.microgreens.Model.PlantCardModel;
+import edu.uph.m23si1.microgreens.Model.PlantListItem;
 import edu.uph.m23si1.microgreens.R;
 import edu.uph.m23si1.microgreens.data.AppFirebaseDatabase;
-import edu.uph.m23si1.microgreens.data.MicrogreensSnapshot;
+import edu.uph.m23si1.microgreens.data.PlantsQuery;
 
 public class HistoryFragment extends Fragment {
 
@@ -33,7 +34,8 @@ public class HistoryFragment extends Fragment {
     List<PlantCardModel> currentList;
     List<PlantCardModel> previousList;
 
-    DatabaseReference db;
+    DatabaseReference databaseRootRef;
+    private ValueEventListener plantsListener;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -50,8 +52,9 @@ public class HistoryFragment extends Fragment {
         previousList = new ArrayList<>();
 
         PlantCardAdapter.OnPlantClickListener click = plant -> {
-            if (plant == null) return;
+            if (plant == null || plant.getPlantId() == null) return;
             HistoryLogFragment logFragment = HistoryLogFragment.newInstance(
+                    plant.getPlantId(),
                     plant.getName(),
                     plant.getLastActivityDateLabel(),
                     plant.getLastActivityTime()
@@ -69,27 +72,31 @@ public class HistoryFragment extends Fragment {
         currentRecycler.setAdapter(currentAdapter);
         previousRecycler.setAdapter(previousAdapter);
 
-        db = AppFirebaseDatabase.get().getReference(MicrogreensSnapshot.REF_MICROGREENS);
+        databaseRootRef = AppFirebaseDatabase.get().getReference();
         loadData();
 
         return view;
     }
 
     private void loadData() {
-        db.addValueEventListener(new ValueEventListener() {
+        if (plantsListener != null) {
+            databaseRootRef.removeEventListener(plantsListener);
+        }
+        plantsListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                currentList.clear();
+                List<PlantListItem> all = PlantsQuery.fromDatabaseRoot(snapshot);
+                PlantListItem current = PlantsQuery.currentActive(all);
+                List<PlantListItem> prevRows = PlantsQuery.previousPlantsForHistory(all, current);
 
-                PlantCardModel current = MicrogreensSnapshot.buildCurrentPlantCard(snapshot);
+                currentList.clear();
                 if (current != null) {
-                    currentList.add(current);
+                    currentList.add(PlantCardModel.fromPlantListItem(current));
                 }
 
-                if (previousList.isEmpty()) {
-                    previousList.add(new PlantCardModel("Bean Sprouts", "Last Activity: 11 September", "2025 11.03.05"));
-                    previousList.add(new PlantCardModel("Spinach", "Last Activity: 11 September", "2025 11.03.05"));
-                    previousList.add(new PlantCardModel("Carrot", "Last Activity: 11 September", "2025 11.03.05"));
+                previousList.clear();
+                for (PlantListItem row : prevRows) {
+                    previousList.add(PlantCardModel.fromPlantListItem(row));
                 }
 
                 currentAdapter.notifyDataSetChanged();
@@ -99,6 +106,16 @@ public class HistoryFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
             }
-        });
+        };
+        databaseRootRef.addValueEventListener(plantsListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (plantsListener != null && databaseRootRef != null) {
+            databaseRootRef.removeEventListener(plantsListener);
+            plantsListener = null;
+        }
     }
 }

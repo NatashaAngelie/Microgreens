@@ -13,13 +13,15 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.List;
+
 import edu.uph.m23si1.microgreens.R;
-import edu.uph.m23si1.microgreens.Model.Plant;
+import edu.uph.m23si1.microgreens.Model.PlantListItem;
 import edu.uph.m23si1.microgreens.data.AppFirebaseDatabase;
 import edu.uph.m23si1.microgreens.data.MicrogreensSnapshot;
+import edu.uph.m23si1.microgreens.data.PlantsQuery;
 
 public class HomeFragment extends Fragment {
 
@@ -28,8 +30,10 @@ public class HomeFragment extends Fragment {
     TextView tvPrevPlant, tvPlanted, tvSprout, tvHarvest;
 
     DatabaseReference microgreensRef;
-    DatabaseReference plantsRef;
+    DatabaseReference databaseRootRef;
     DatabaseReference sensorRef;
+
+    private ValueEventListener plantsListener;
 
     public HomeFragment() {}
 
@@ -66,30 +70,15 @@ public class HomeFragment extends Fragment {
         tvHarvest.setText("Harvested: -");
 
         microgreensRef = AppFirebaseDatabase.get().getReference(MicrogreensSnapshot.REF_MICROGREENS);
-        plantsRef = AppFirebaseDatabase.get().getReference(MicrogreensSnapshot.REF_ROOT_PLANTS);
+        databaseRootRef = AppFirebaseDatabase.get().getReference();
         sensorRef = AppFirebaseDatabase.get().getReference("Sensor");
 
-        // ====== AMBIL 2 TANAMAN TERAKHIR DARI "plants" ======
-        // Aturan UI:
-        // - Nama tanaman di header (sebelah icon): tanaman paling recent (terbaru)
-        // - Card "My previous plant": tanaman ke-2 paling recent
-        Query lastTwoPlants = plantsRef.orderByChild("datePlanted").limitToLast(2);
-        lastTwoPlants.addValueEventListener(new ValueEventListener() {
+        plantsListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Plant newest = null;
-                Plant second = null;
-
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    Plant p = child.getValue(Plant.class);
-                    if (p == null) continue;
-                    // Karena limitToLast + orderByChild, urutan iterasi biasanya ascending.
-                    // Kita ambil 2 item terakhir dengan menyimpan bergeser.
-                    second = newest;
-                    newest = p;
-                }
-
-                if (newest == null) {
+                List<PlantListItem> all = PlantsQuery.fromDatabaseRoot(snapshot);
+                PlantListItem current = PlantsQuery.currentActive(all);
+                if (current == null) {
                     tvCurrentPlantName.setText(R.string.plant_name_placeholder);
                     tvPrevPlant.setText(R.string.plant_name_placeholder);
                     tvPlanted.setText("Planted: -");
@@ -98,15 +87,14 @@ public class HomeFragment extends Fragment {
                     return;
                 }
 
-                // Header name = newest
-                String currentName = newest.getPlantName();
+                String currentName = current.getPlant().getPlantName();
                 if (currentName == null || currentName.trim().isEmpty()) {
                     currentName = getString(R.string.plant_name_placeholder);
                 }
                 tvCurrentPlantName.setText(currentName);
 
-                // Previous card = second newest
-                if (second == null) {
+                PlantListItem previous = PlantsQuery.previousForHomeCard(all, current);
+                if (previous == null) {
                     tvPrevPlant.setText(R.string.plant_name_placeholder);
                     tvPlanted.setText("Planted: -");
                     tvSprout.setText("Sprouted: -");
@@ -114,15 +102,15 @@ public class HomeFragment extends Fragment {
                     return;
                 }
 
-                String prevName = second.getPlantName();
+                String prevName = previous.getPlant().getPlantName();
                 if (prevName == null || prevName.trim().isEmpty()) {
                     prevName = getString(R.string.plant_name_placeholder);
                 }
                 tvPrevPlant.setText(prevName);
 
-                String planted = second.getDatePlanted();
-                String sprouted = second.getDateSprouted();
-                String harvested = second.getHarvestDate();
+                String planted = previous.getPlant().getDatePlanted();
+                String sprouted = previous.getPlant().getDateSprouted();
+                String harvested = previous.getPlant().getHarvestDate();
                 tvPlanted.setText("Planted: " + (planted != null && !planted.isEmpty() ? planted : "-"));
                 tvSprout.setText("Sprouted: " + (sprouted != null && !sprouted.isEmpty() ? sprouted : "-"));
                 tvHarvest.setText("Harvested: " + (harvested != null && !harvested.isEmpty() ? harvested : "-"));
@@ -130,11 +118,11 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("HomeFragment", "Gagal baca previous plants", error.toException());
+                Log.e("HomeFragment", "Gagal baca plants", error.toException());
             }
-        });
+        };
+        databaseRootRef.addValueEventListener(plantsListener);
 
-        // Fallback: beberapa project simpan sensor di root "Sensor" (bukan di microgreens)
         sensorRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -174,13 +162,8 @@ public class HomeFragment extends Fragment {
         microgreensRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Log isi snapshot biar gampang cek struktur di Logcat
                 Log.d("HomeFragment", "microgreens snapshot: " + snapshot.getValue());
 
-                // ====== DATA SENSOR (TEMP / HUM / SOIL) ======
-                // Support beberapa format key yang sering dipakai:
-                // - microgreens/sensors/{temperature, humidity, soilMoisture}
-                // - microgreens/Sensor/{Suhu, Kelembaban, Tanah}
                 DataSnapshot sensorsSnap = snapshot.child("sensors").exists()
                         ? snapshot.child("sensors")
                         : snapshot.child("Sensor");
@@ -210,7 +193,6 @@ public class HomeFragment extends Fragment {
                     if (soilVal != null) tvSoil.setText(soilVal + "%");
                 }
 
-                // ====== DATA AKTUATOR (LED / FAN / PUMP) ======
                 DataSnapshot controlSnap = snapshot.child("control");
                 if (controlSnap.exists()) {
                     Object ledVal = controlSnap.child("led").getValue();
@@ -234,6 +216,15 @@ public class HomeFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (plantsListener != null && databaseRootRef != null) {
+            databaseRootRef.removeEventListener(plantsListener);
+            plantsListener = null;
+        }
     }
 
     private static Object firstNonNull(Object... values) {

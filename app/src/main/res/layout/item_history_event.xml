@@ -15,17 +15,17 @@
         <View
             android:layout_width="2dp"
             android:layout_height="8dp"
-            android:background="#CFCFCF" />
+            android:background="@color/history_timeline_line" />
 
         <View
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:background="#6B6B6B" />
+            android:background="@color/history_timeline_dot" />
 
         <View
             android:layout_width="2dp"
             android:layout_height="match_parent"
-            android:background="#CFCFCF" />
+            android:background="@color/history_timeline_line" />
     </LinearLayout>
 
     <LinearLayout

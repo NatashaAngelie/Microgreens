@@ -67,6 +67,6 @@ public final class MicrogreensSnapshot {
                 ? "Last Activity: " + watered
                 : "Last Activity: -";
         String timeLine = watered != null ? watered : "-";
-        return new PlantCardModel(name, activityLabel, timeLine);
+        return new PlantCardModel(null, name, activityLabel, timeLine);
     }
 }

@@ -41,6 +41,7 @@
     <string name="toolbar_home">Smart Microgreens</string>
     <string name="toolbar_manage_plants">Manage Plants</string>
     <string name="toolbar_history">History</string>
+    <string name="history_log_title">History Log</string>
 
     <string name="profile_title">Profile</string>
     <string name="profile_label_name">Name</string>

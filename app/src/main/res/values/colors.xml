@@ -3,4 +3,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#4CAF50</color>
+    <color name="history_screen_bg">#E8F5E9</color>
+    <color name="history_green_dark">#1B5E20</color>
+    <color name="history_card_bg">#C8E6C9</color>
+    <color name="history_timeline_line">#43A047</color>
+    <color name="history_timeline_dot">#2E7D32</color>
 </resources>
