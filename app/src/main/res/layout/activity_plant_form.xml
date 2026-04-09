@@ -89,9 +89,12 @@
                     android:background="@drawable/input_bg"
                     android:hint="@string/hint_date_yyyy_mm_dd"
                     android:imeOptions="actionNext"
-                    android:inputType="text"
+                    android:inputType="none"
                     android:maxLines="1"
-                    android:paddingHorizontal="12dp" />
+                    android:paddingHorizontal="12dp"
+                    android:focusable="false"
+                    android:cursorVisible="false"
+                    android:clickable="true" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -109,9 +112,12 @@
                     android:background="@drawable/input_bg"
                     android:hint="@string/hint_date_yyyy_mm_dd"
                     android:imeOptions="actionNext"
-                    android:inputType="text"
+                    android:inputType="none"
                     android:maxLines="1"
-                    android:paddingHorizontal="12dp" />
+                    android:paddingHorizontal="12dp"
+                    android:focusable="false"
+                    android:cursorVisible="false"
+                    android:clickable="true" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -129,9 +135,12 @@
                     android:background="@drawable/input_bg"
                     android:hint="@string/hint_date_yyyy_mm_dd"
                     android:imeOptions="actionDone"
-                    android:inputType="text"
+                    android:inputType="none"
                     android:maxLines="1"
-                    android:paddingHorizontal="12dp" />
+                    android:paddingHorizontal="12dp"
+                    android:focusable="false"
+                    android:cursorVisible="false"
+                    android:clickable="true" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </ScrollView>

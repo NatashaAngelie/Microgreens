@@ -26,7 +26,10 @@
     <string name="label_plant_photo">Plant photo</string>
     <string name="photo_upload_hint">Photo from gallery — coming soon</string>
     <string name="hint_select_plant">Select a plant</string>
-    <string name="hint_date_yyyy_mm_dd">YYYY-MM-DD</string>
+    <string name="hint_date_yyyy_mm_dd">YYYY-MM-DD HH:mm</string>
+    <string name="date_picker_clear_hint">Long-press to clear</string>
+    <string name="invalid_date_before_today">Date must be today or later.</string>
+    <string name="pick_date_time">Pick date &amp; time</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="delete_plant_title">Delete plant</string>

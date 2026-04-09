@@ -1,10 +1,11 @@
 package edu.uph.m23si1.microgreens;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -13,22 +14,36 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+import edu.uph.m23si1.microgreens.Adapter.PlantTypeDropdownAdapter;
 import edu.uph.m23si1.microgreens.Model.Plant;
+import edu.uph.m23si1.microgreens.Model.PlantType;
 import edu.uph.m23si1.microgreens.data.AppFirebaseDatabase;
+import edu.uph.m23si1.microgreens.data.LocalPlantTypeStore;
 import edu.uph.m23si1.microgreens.data.MicrogreensHistoryWriter;
 import edu.uph.m23si1.microgreens.data.MicrogreensSnapshot;
 import edu.uph.m23si1.microgreens.data.PlantFirebasePaths;
@@ -51,6 +66,17 @@ public class PlantFormActivity extends AppCompatActivity {
     private EditText inputPlanted;
     private EditText inputSprouted;
     private EditText inputHarvest;
+    private ImageView photo;
+
+    private final List<PlantType> plantTypes = new ArrayList<>();
+    @Nullable
+    private String pendingNewTypeName;
+
+    private final ActivityResultLauncher<String> pickImage =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), this::onPickedImage);
+
+    private static final SimpleDateFormat DATE_TIME_FMT =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,24 +108,157 @@ public class PlantFormActivity extends AppCompatActivity {
         inputPlanted = findViewById(R.id.inputDatePlanted);
         inputSprouted = findViewById(R.id.inputDateSprouted);
         inputHarvest = findViewById(R.id.inputHarvestDate);
+        inputName.setThreshold(0);
+        inputName.setOnClickListener(v -> {
+            hideKeyboard();
+            inputName.showDropDown();
+        });
+        inputName.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                hideKeyboard();
+                inputName.showDropDown();
+            }
+        });
+        setupPlantTypesDropdown();
 
-        String[] suggestions = getResources().getStringArray(R.array.plant_name_suggestions);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, suggestions);
+        // Date fields: tap to pick (no manual typing). Long-press clears optional fields.
+        setupDateTimeField(inputPlanted, /*required*/ true);
+        setupDateTimeField(inputSprouted, /*required*/ false);
+        setupDateTimeField(inputHarvest, /*required*/ false);
 
-        inputName.setAdapter(adapter);
-        inputName.setThreshold(1);
+        if (plantId == null) {
+            // default start from today
+            if (text(inputPlanted).isEmpty()) {
+                inputPlanted.setText(DATE_TIME_FMT.format(Calendar.getInstance().getTime()));
+            }
+        }
 
         MaterialButton save = findViewById(R.id.btnSavePlant);
         save.setText(plantId == null ? R.string.btn_add_plant : R.string.btn_save_edit);
         save.setOnClickListener(v -> savePlant());
 
-        ImageView photo = findViewById(R.id.ivPlantPhoto);
-        photo.setOnClickListener(v ->
-                Toast.makeText(this, R.string.photo_upload_hint, Toast.LENGTH_SHORT).show());
+        photo = findViewById(R.id.ivPlantPhoto);
+        photo.setOnClickListener(v -> {
+            // Photo is tied to plant type selection for now.
+            inputName.showDropDown();
+        });
 
         if (plantId != null) {
             loadExisting(plantId);
+        }
+    }
+
+    private void setupPlantTypesDropdown() {
+        plantTypes.clear();
+
+        // Built-ins from resources
+        String[] suggestions = getResources().getStringArray(R.array.plant_name_suggestions);
+        for (String s : suggestions) {
+            String id = LocalPlantTypeStore.slugId(s);
+            plantTypes.add(new PlantType(id, s, null, true));
+        }
+
+        // User-added (local)
+        plantTypes.addAll(LocalPlantTypeStore.loadUserTypes(this));
+
+        // Special row to add new type
+        plantTypes.add(new PlantType("__add__", "+ Add plant type...", null, true));
+
+        PlantTypeDropdownAdapter adapter = new PlantTypeDropdownAdapter(this, plantTypes);
+        inputName.setAdapter(adapter);
+
+        inputName.setOnItemClickListener((parent, view, position, id) -> {
+            PlantType selected = (PlantType) parent.getItemAtPosition(position);
+            if (selected == null) return;
+
+            if ("__add__".equals(selected.getId())) {
+                inputName.setText("");
+                showAddPlantTypeDialog();
+                return;
+            }
+
+            inputName.setText(selected.getDisplayName(), false);
+            applyTypeImage(selected);
+        });
+    }
+
+    private void applyTypeImage(@NonNull PlantType t) {
+        if (t.getLocalImagePath() != null && !t.getLocalImagePath().trim().isEmpty()) {
+            try {
+                photo.setImageURI(Uri.fromFile(new File(t.getLocalImagePath())));
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        photo.setImageResource(R.drawable.ic_plant_placeholder_small);
+    }
+
+    private void showAddPlantTypeDialog() {
+        final EditText nameInput = new EditText(this);
+        nameInput.setHint(getString(R.string.label_plant_name));
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        nameInput.setPadding(pad, pad, pad, pad);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Add plant type")
+                .setMessage("Enter plant type name, then choose an image (optional).")
+                .setView(nameInput)
+                .setNeutralButton("Pick image", (d, which) -> {
+                    pendingNewTypeName = nameInput.getText() != null ? nameInput.getText().toString().trim() : "";
+                    if (pendingNewTypeName == null || pendingNewTypeName.isEmpty()) {
+                        Toast.makeText(this, "Plant type name required first.", Toast.LENGTH_LONG).show();
+                        pendingNewTypeName = null;
+                        return;
+                    }
+                    pickImage.launch("image/*");
+                })
+                .setPositiveButton("Save", (d, which) -> {
+                    String n = nameInput.getText() != null ? nameInput.getText().toString().trim() : "";
+                    if (n.isEmpty()) {
+                        Toast.makeText(this, "Plant type name is required.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    // Save with no image for now (user can re-add with same name to replace)
+                    LocalPlantTypeStore.saveUserType(this, n, null);
+                    setupPlantTypesDropdown();
+                    inputName.setText(n, false);
+                    photo.setImageResource(R.drawable.ic_plant_placeholder_small);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void onPickedImage(@Nullable Uri uri) {
+        if (uri == null) return;
+        if (pendingNewTypeName == null || pendingNewTypeName.trim().isEmpty()) {
+            return;
+        }
+        String name = pendingNewTypeName.trim();
+        pendingNewTypeName = null;
+
+        try {
+            File dir = LocalPlantTypeStore.imagesDir(this);
+            String base = LocalPlantTypeStore.slugId(name);
+            File out = new File(dir, base + ".jpg");
+
+            try (InputStream in = getContentResolver().openInputStream(uri);
+                 FileOutputStream fos = new FileOutputStream(out)) {
+                if (in != null) {
+                    byte[] buf = new byte[8192];
+                    int r;
+                    while ((r = in.read(buf)) > 0) {
+                        fos.write(buf, 0, r);
+                    }
+                }
+            }
+
+            LocalPlantTypeStore.saveUserType(this, name, out.getAbsolutePath());
+            setupPlantTypesDropdown();
+            inputName.setText(name, false);
+            photo.setImageURI(Uri.fromFile(out));
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Could not save image.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -184,6 +343,100 @@ public class PlantFormActivity extends AppCompatActivity {
         inputPlanted.setText(p.getDatePlanted());
         inputSprouted.setText(nonNullStr(p.getDateSprouted()));
         inputHarvest.setText(nonNullStr(p.getHarvestDate()));
+
+        // best-effort: apply image if plantName matches a known type
+        for (PlantType t : plantTypes) {
+            if (t.getDisplayName().equalsIgnoreCase(p.getPlantName())) {
+                applyTypeImage(t);
+                break;
+            }
+        }
+    }
+
+    private void setupDateTimeField(@NonNull EditText field, boolean required) {
+        field.setInputType(InputType.TYPE_NULL);
+        field.setKeyListener(null);
+        field.setOnClickListener(v -> openDateTimePicker(field, required));
+        field.setOnLongClickListener(v -> {
+            if (!required) {
+                field.setText("");
+                Toast.makeText(this, R.string.date_picker_clear_hint, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void openDateTimePicker(@NonNull EditText target, boolean required) {
+        // For now: we keep UX simple—use current time and clamp date >= today.
+        // The stored format keeps lexical sorting consistent with existing string compare logic.
+        final Calendar now = Calendar.getInstance();
+        final Calendar picked = Calendar.getInstance();
+
+        // If existing value parses, start from it
+        String existing = text(target);
+        if (!existing.isEmpty()) {
+            try {
+                picked.setTime(DATE_TIME_FMT.parse(existing));
+            } catch (Exception ignored) {
+                picked.setTime(now.getTime());
+            }
+        }
+
+        android.app.DatePickerDialog dp = new android.app.DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    picked.set(Calendar.YEAR, year);
+                    picked.set(Calendar.MONTH, month);
+                    picked.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    // Validate: must be today or later
+                    Calendar today = Calendar.getInstance();
+                    clearTime(today);
+                    Calendar pickedDay = (Calendar) picked.clone();
+                    clearTime(pickedDay);
+                    if (pickedDay.before(today)) {
+                        Toast.makeText(this, R.string.invalid_date_before_today, Toast.LENGTH_LONG).show();
+                        if (!required && existing.isEmpty()) {
+                            target.setText("");
+                        }
+                        return;
+                    }
+
+                    android.app.TimePickerDialog tp = new android.app.TimePickerDialog(
+                            this,
+                            (timeView, hourOfDay, minute) -> {
+                                picked.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                picked.set(Calendar.MINUTE, minute);
+                                picked.set(Calendar.SECOND, 0);
+                                picked.set(Calendar.MILLISECOND, 0);
+                                target.setText(DATE_TIME_FMT.format(picked.getTime()));
+                            },
+                            picked.get(Calendar.HOUR_OF_DAY),
+                            picked.get(Calendar.MINUTE),
+                            true
+                    );
+                    tp.setTitle(getString(R.string.pick_date_time));
+                    tp.show();
+                },
+                picked.get(Calendar.YEAR),
+                picked.get(Calendar.MONTH),
+                picked.get(Calendar.DAY_OF_MONTH)
+        );
+        dp.setTitle(getString(R.string.pick_date_time));
+
+        // minDate = today (00:00)
+        Calendar min = Calendar.getInstance();
+        clearTime(min);
+        dp.getDatePicker().setMinDate(min.getTimeInMillis());
+        dp.show();
+    }
+
+    private static void clearTime(@NonNull Calendar c) {
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
     }
 
     private void savePlant() {
