@@ -15,6 +15,11 @@
                 android:title="My Plants"
                 android:icon="@android:drawable/ic_menu_agenda"/>
 
+            <item
+                android:id="@+id/menu_plant_specs"
+                android:title="Plant Specifications"
+                android:icon="@android:drawable/ic_menu_info_details"/>
+
         </menu>
     </item>
 </menu>
