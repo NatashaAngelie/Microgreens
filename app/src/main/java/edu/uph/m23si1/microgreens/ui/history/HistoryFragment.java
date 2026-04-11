@@ -59,6 +59,7 @@ public class HistoryFragment extends Fragment {
                     plant.getLastActivityDateLabel(),
                     plant.getLastActivityTime()
             );
+            // commitNow() is not allowed with addToBackStack() — use commit().
             requireActivity()
                     .getSupportFragmentManager()
                     .beginTransaction()

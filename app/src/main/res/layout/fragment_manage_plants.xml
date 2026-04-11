@@ -4,16 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#EEEEEE">
+    android:background="@color/surface_muted">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarManagePlants"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#F5F5F5"
+        android:background="@color/primary"
         app:navigationIcon="@drawable/ic_back_24"
+        app:navigationIconTint="@color/white"
         app:title="@string/toolbar_manage_plants"
-        app:titleTextColor="#2C2C2C" />
+        app:titleTextColor="@color/white" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddPlant"
@@ -27,9 +28,9 @@
         android:minHeight="52dp"
         android:text="@string/add_new_plant"
         android:textAllCaps="true"
-        android:textColor="#333333"
-        app:backgroundTint="#E0E0E0"
-        app:cornerRadius="12dp" />
+        android:textColor="@color/white"
+        app:backgroundTint="@color/primary"
+        app:cornerRadius="14dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerPlants"

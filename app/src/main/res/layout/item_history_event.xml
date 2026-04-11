@@ -41,16 +41,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Radish was watered"
-            android:textStyle="bold"
-            android:textSize="14sp" />
+            android:textColor="@color/primary_variant"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/eventTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="11 September 2025 | 11.03.05 WIB"
+            android:textColor="@color/text_secondary"
             android:textSize="12sp"
-            android:textColor="#666666"
             android:layout_marginTop="2dp" />
     </LinearLayout>
 </LinearLayout>

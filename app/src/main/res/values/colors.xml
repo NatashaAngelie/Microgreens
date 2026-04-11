@@ -2,7 +2,17 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="primary">#4CAF50</color>
+    <!-- Smart Microgreens palette -->
+    <color name="primary">#2E7D32</color>
+    <color name="primary_light">#43A047</color>
+    <color name="primary_variant">#1B5E20</color>
+    <color name="mint_bg">#E8F5E9</color>
+    <color name="mint_card">#F1F8E9</color>
+    <color name="surface_muted">#FAFAFA</color>
+    <color name="text_secondary">#546E7A</color>
+    <color name="divider_soft">#C8E6C9</color>
+    <color name="outline_soft">#A5D6A7</color>
+    <color name="accent_red">#D32F2F</color>
     <color name="history_screen_bg">#E8F5E9</color>
     <color name="history_green_dark">#1B5E20</color>
     <color name="history_card_bg">#C8E6C9</color>

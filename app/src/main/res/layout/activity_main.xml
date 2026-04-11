@@ -15,9 +15,10 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="56dp"
+            android:background="@color/primary"
             android:title="Smart Microgreens"
-            android:background="@android:color/white"
-            app:titleTextColor="@android:color/black"/>
+            app:navigationIconTint="@color/white"
+            app:titleTextColor="@color/white" />
 
         <FrameLayout
             android:id="@+id/fragmentContainer"
@@ -29,7 +30,11 @@
             android:id="@+id/bottomNav"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:menu="@menu/bottom_nav_menu"/>
+            android:background="@color/white"
+            app:itemIconTint="@color/bottom_nav_selector"
+            app:itemTextColor="@color/bottom_nav_selector"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav_menu" />
 
     </LinearLayout>
 
@@ -38,7 +43,8 @@
         android:id="@+id/navDrawer"
         android:layout_width="280dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start">
+        android:layout_gravity="start"
+        android:background="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -50,7 +56,10 @@
                 android:id="@+id/navMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:menu="@menu/menu_drawer"/>
+                android:background="@color/white"
+                app:itemIconTint="@color/primary"
+                app:itemTextColor="@color/primary"
+                app:menu="@menu/menu_drawer" />
 
             <!-- DORONG KE BAWAH -->
             <View

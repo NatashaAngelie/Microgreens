@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     NavigationView navDrawer;
     MaterialToolbar toolbar;
     private ActionBarDrawerToggle drawerToggle;
+    private OnBackPressedCallback backFromHistoryLog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,16 +61,25 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
-        toolbar.setNavigationOnClickListener(v -> {
-            FragmentManager fm = getSupportFragmentManager();
-            if (fm.getBackStackEntryCount() > 0) {
-                fm.popBackStack();
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START);
+        backFromHistoryLog = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                FragmentManager fm = getSupportFragmentManager();
+                if (fm.getBackStackEntryCount() > 0) {
+                    fm.popBackStackImmediate();
+                }
             }
+        };
+        getOnBackPressedDispatcher().addCallback(this, backFromHistoryLog);
+
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            if (backFromHistoryLog != null) {
+                backFromHistoryLog.setEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
+            }
+            updateToolbarForTopFragment();
         });
 
-        getSupportFragmentManager().addOnBackStackChangedListener(this::updateToolbarForTopFragment);
+        bindToolbarNavigation();
 
         // ===== BOTTOM NAVIGATION =====
         bottomNav.setOnItemSelectedListener(item -> {
@@ -77,11 +89,11 @@ public class MainActivity extends AppCompatActivity {
                 loadFragment(new HomeFragment());
             }
             else if (item.getItemId() == R.id.navigation_control) {
-                setToolbarTitle(getString(R.string.title_control));
+                setToolbarTitle(getString(R.string.toolbar_home));
                 loadFragment(new ControlFragment());
             }
             else if (item.getItemId() == R.id.navigation_history) {
-                setToolbarTitle(getString(R.string.toolbar_history));
+                setToolbarTitle(getString(R.string.toolbar_home));
                 loadFragment(new HistoryFragment());
             }
 
@@ -137,35 +149,55 @@ public class MainActivity extends AppCompatActivity {
         updateToolbarForTopFragment();
     }
 
+    /**
+     * ActionBarDrawerToggle.syncState() can replace the toolbar navigation click listener.
+     * Re-bind after every toolbar icon / drawer-indicator update so back stack + drawer both work.
+     */
+    private void bindToolbarNavigation() {
+        if (toolbar == null || drawerLayout == null) {
+            return;
+        }
+        toolbar.setNavigationOnClickListener(v -> {
+            FragmentManager fm = getSupportFragmentManager();
+            if (fm.getBackStackEntryCount() > 0) {
+                fm.popBackStackImmediate();
+                return;
+            }
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+    }
+
     private void updateToolbarForTopFragment() {
         if (toolbar == null || drawerToggle == null) {
             return;
         }
+        int navWhite = ContextCompat.getColor(this, R.color.white);
         Fragment f = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
         if (f instanceof HistoryLogFragment) {
             drawerToggle.setDrawerIndicatorEnabled(false);
             toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
-            setToolbarTitle(getString(R.string.history_log_title));
+            toolbar.setNavigationIconTint(navWhite);
+            setToolbarTitle(getString(R.string.toolbar_home));
         } else if (f instanceof ManagePlantsFragment) {
             drawerToggle.setDrawerIndicatorEnabled(true);
             drawerToggle.syncState();
+            toolbar.setNavigationIconTint(navWhite);
             setToolbarTitle(getString(R.string.toolbar_manage_plants));
         } else {
             drawerToggle.setDrawerIndicatorEnabled(true);
             drawerToggle.syncState();
+            toolbar.setNavigationIconTint(navWhite);
             applyToolbarTitleForSelectedNav();
         }
+        bindToolbarNavigation();
     }
 
     private void applyToolbarTitleForSelectedNav() {
-        int id = bottomNav.getSelectedItemId();
-        if (id == R.id.navigation_home) {
-            setToolbarTitle(getString(R.string.toolbar_home));
-        } else if (id == R.id.navigation_control) {
-            setToolbarTitle(getString(R.string.title_control));
-        } else if (id == R.id.navigation_history) {
-            setToolbarTitle(getString(R.string.toolbar_history));
-        }
+        setToolbarTitle(getString(R.string.toolbar_home));
     }
 
     @Override
@@ -191,11 +223,11 @@ public class MainActivity extends AppCompatActivity {
 
     // ===== FUNCTION PINDAH FRAGMENT =====
     void loadFragment(Fragment fragment) {
-        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        getSupportFragmentManager()
-                .beginTransaction()
+        FragmentManager fm = getSupportFragmentManager();
+        fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fm.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
-                .commit();
+                .commitNow();
         updateToolbarForTopFragment();
     }
 

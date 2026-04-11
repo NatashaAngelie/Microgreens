@@ -1,16 +1,15 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- LOGOUT BUTTON -->
-        <Button
+    <Button
         android:id="@+id/btnLogout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="LOG OUT"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#E53935"/>
-    </LinearLayout>
+        android:layout_height="52dp"
+        android:backgroundTint="@color/accent_red"
+        android:text="LOGOUT"
+        android:textAllCaps="true"
+        android:textColor="@color/white" />
+</LinearLayout>

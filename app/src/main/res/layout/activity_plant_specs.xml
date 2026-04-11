@@ -4,16 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#EEEEEE">
+    android:background="@color/surface_muted">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarPlantSpecs"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#F5F5F5"
+        android:background="@color/primary"
         app:navigationIcon="@drawable/ic_back_24"
+        app:navigationIconTint="@color/white"
         app:title="Plant Specifications"
-        app:titleTextColor="#2C2C2C" />
+        app:titleTextColor="@color/white" />
 
     <!-- 0dp + weight: di LinearLayout vertikal, match_parent untuk RecyclerView sering bikin area scroll salah / item kepotong. -->
     <androidx.recyclerview.widget.RecyclerView
