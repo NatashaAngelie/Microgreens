@@ -22,17 +22,27 @@ public class PlantSpecAdapter extends RecyclerView.Adapter<PlantSpecAdapter.VH> 
         void onEdit(@NonNull PlantType type);
     }
 
+    public interface OnDeleteClick {
+        void onDelete(@NonNull PlantType type);
+    }
+
     private final List<PlantType> types = new ArrayList<>();
     private final SpecProvider provider;
     private final OnEditClick onEditClick;
+    private final OnDeleteClick onDeleteClick;
 
     public interface SpecProvider {
         PlantSpec getSpec(@NonNull String plantTypeId);
     }
 
-    public PlantSpecAdapter(@NonNull SpecProvider provider, @NonNull OnEditClick onEditClick) {
+    public PlantSpecAdapter(
+            @NonNull SpecProvider provider,
+            @NonNull OnEditClick onEditClick,
+            @NonNull OnDeleteClick onDeleteClick
+    ) {
         this.provider = provider;
         this.onEditClick = onEditClick;
+        this.onDeleteClick = onDeleteClick;
     }
 
     public void submit(@NonNull List<PlantType> items) {
@@ -57,6 +67,7 @@ public class PlantSpecAdapter extends RecyclerView.Adapter<PlantSpecAdapter.VH> 
         h.summary.setText(summary(s));
 
         h.edit.setOnClickListener(v -> onEditClick.onEdit(t));
+        h.delete.setOnClickListener(v -> onDeleteClick.onDelete(t));
     }
 
     @Override
@@ -76,12 +87,14 @@ public class PlantSpecAdapter extends RecyclerView.Adapter<PlantSpecAdapter.VH> 
         final TextView name;
         final TextView summary;
         final View edit;
+        final View delete;
 
         VH(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.tvSpecPlantName);
             summary = itemView.findViewById(R.id.tvSpecSummary);
             edit = itemView.findViewById(R.id.btnEditSpec);
+            delete = itemView.findViewById(R.id.btnDeleteSpec);
         }
     }
 }

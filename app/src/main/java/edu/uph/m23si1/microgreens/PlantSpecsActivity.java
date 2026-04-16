@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,6 +47,14 @@ public class PlantSpecsActivity extends AppCompatActivity {
 
         MaterialToolbar tb = findViewById(R.id.toolbarPlantSpecs);
         tb.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        tb.inflateMenu(R.menu.menu_plant_specs);
+        tb.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_add_spec) {
+                openAddDialog();
+                return true;
+            }
+            return false;
+        });
 
         specsRef = AppFirebaseDatabase.get().getReference("plantSpecs");
 
@@ -54,7 +63,8 @@ public class PlantSpecsActivity extends AppCompatActivity {
 
         adapter = new PlantSpecAdapter(
                 plantTypeId -> cache.get(plantTypeId),
-                this::openEditDialog
+                this::openEditDialog,
+                this::confirmDelete
         );
         rv.setAdapter(adapter);
 
@@ -204,6 +214,86 @@ public class PlantSpecsActivity extends AppCompatActivity {
                     specsRef.child(type.getId()).setValue(next);
                 })
                 .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void openAddDialog() {
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(pad, pad, pad, pad);
+
+        EditText name = new EditText(this);
+        name.setHint(getString(R.string.label_plant_name));
+        root.addView(name);
+
+        EditText light = numberField("Light hours/day", null);
+        EditText temp = numberField("Temperature (°C)", null);
+        EditText soil = numberField("Soil moisture (%)", null);
+        root.addView(light);
+        root.addView(temp);
+        root.addView(soil);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Add plant specification")
+                .setView(root)
+                .setPositiveButton("Save", (d, which) -> {
+                    String displayName = name.getText() == null ? "" : name.getText().toString().trim();
+                    if (displayName.isEmpty()) {
+                        Toast.makeText(this, "Plant type name is required.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    String id = LocalPlantTypeStore.slugId(displayName);
+                    boolean exists = false;
+                    for (PlantType t : allTypes) {
+                        if (id.equals(t.getId())) {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    PlantSpec nextSpec = new PlantSpec(
+                            parseDoubleOrNull(light.getText() == null ? "" : light.getText().toString()),
+                            parseDoubleOrNull(temp.getText() == null ? "" : temp.getText().toString()),
+                            parseDoubleOrNull(soil.getText() == null ? "" : soil.getText().toString())
+                    );
+
+                    if (exists) {
+                        // Update spec only. (Type name might be builtin; we don't replace builtin list.)
+                        specsRef.child(id).setValue(nextSpec);
+                        Toast.makeText(this, "Updated existing plant spec.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // New custom type: persist locally so it shows in dropdown & spec list after restart.
+                    LocalPlantTypeStore.saveUserType(this, displayName, null);
+                    specsRef.child(id).setValue(nextSpec);
+
+                    loadTypes();
+                    if (adapter != null) adapter.notifyDataSetChanged();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmDelete(@NonNull PlantType type) {
+        if (type.isBuiltin()) {
+            Toast.makeText(this, "Built-in plant types can't be deleted.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String label = type.getDisplayName();
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.delete))
+                .setMessage("Delete specification for \"" + label + "\"?\n\nThis will also remove the custom plant type from your list.")
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(getString(R.string.delete), (d, w) -> {
+                    specsRef.child(type.getId()).removeValue();
+                    LocalPlantTypeStore.deleteUserTypeById(this, type.getId());
+                    loadTypes();
+                    if (adapter != null) adapter.notifyDataSetChanged();
+                })
                 .show();
     }
 

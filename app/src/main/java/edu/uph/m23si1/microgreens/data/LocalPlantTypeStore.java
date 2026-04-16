@@ -72,6 +72,24 @@ public final class LocalPlantTypeStore {
         persist(ctx, next);
     }
 
+    public static void deleteUserTypeById(@NonNull Context ctx, @NonNull String id) {
+        List<PlantType> current = loadUserTypes(ctx);
+        if (current.isEmpty()) return;
+
+        List<PlantType> next = new ArrayList<>();
+        boolean changed = false;
+        for (PlantType t : current) {
+            if (id.equals(t.getId())) {
+                changed = true;
+                continue;
+            }
+            next.add(t);
+        }
+        if (changed) {
+            persist(ctx, next);
+        }
+    }
+
     private static void persist(@NonNull Context ctx, @NonNull List<PlantType> types) {
         JSONArray arr = new JSONArray();
         for (PlantType t : types) {
