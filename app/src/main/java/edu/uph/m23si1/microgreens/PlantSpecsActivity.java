@@ -35,6 +35,7 @@ public class PlantSpecsActivity extends AppCompatActivity {
     private DatabaseReference specsRef;
     private final Map<String, PlantSpec> cache = new HashMap<>();
     private final List<PlantType> allTypes = new ArrayList<>();
+    private boolean specsLoadedOnce = false;
 
     private PlantSpecAdapter adapter;
 
@@ -66,7 +67,11 @@ public class PlantSpecsActivity extends AppCompatActivity {
         super.onResume();
         // Jenis tanaman custom disimpan lokal di PlantForm; refresh daftar saat kembali ke layar ini.
         loadTypes();
-        ensureFirebaseSpecRowsForLoadedTypes();
+        // Jangan pernah "seed blank spec" sebelum cache terisi dari Firebase,
+        // karena itu bisa menimpa (overwrite) spec yang sudah ada.
+        if (specsLoadedOnce) {
+            ensureFirebaseSpecRowsForLoadedTypes();
+        }
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
@@ -116,6 +121,7 @@ public class PlantSpecsActivity extends AppCompatActivity {
                     }
                     cache.put(id, s);
                 }
+                specsLoadedOnce = true;
 
                 seedDefaultsIfMissing();
                 adapter.notifyDataSetChanged();
